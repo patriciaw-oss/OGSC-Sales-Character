@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OGSC Character Discovery</title>
+    <style>
+      :root {
+        --ogsc-green: #00b14f;
+        --ogsc-green-deep: #009144;
+        --glass-bg: rgba(255, 255, 255, 0.12);
+        --glass-border: rgba(255, 255, 255, 0.25);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        background: linear-gradient(145deg, #022c22 0%, #065f46 45%, #006b3c 100%);
+        color: #ecfdf5;
+      }
+
+      .bg-accent {
+        pointer-events: none;
+        position: fixed;
+        inset: 0;
+        opacity: 0.4;
+        background: radial-gradient(
+            ellipse 80% 50% at 50% -20%,
+            rgba(0, 177, 79, 0.45),
+            transparent
+          ),
+          radial-gradient(ellipse 60% 40% at 100% 100%, rgba(255, 255, 255, 0.08), transparent);
+      }
+
+      .wrap {
+        position: relative;
+        z-index: 1;
+        max-width: 36rem;
+        margin: 0 auto;
+        min-height: 100vh;
+        padding: 2rem 1rem 2.5rem;
+      }
+
+      @media (min-width: 640px) {
+        .wrap {
+          max-width: 40rem;
+          padding: 2rem 1.5rem 2.5rem;
+        }
+      }
+
+      header.masthead {
+        text-align: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .eyebrow {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: rgba(167, 243, 208, 0.95);
+        margin: 0 0 0.25rem;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 0;
+        text-wrap: balance;
+      }
+
+      @media (min-width: 640px) {
+        h1 {
+          font-size: 1.875rem;
+        }
+      }
+
+      .sub {
+        margin: 0.5rem 0 0;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        color: rgba(209, 250, 229, 0.9);
+        text-wrap: pretty;
+      }
+
+      @media (min-width: 640px) {
+        .sub {
+          font-size: 1rem;
+        }
+      }
+
+      .glass {
+        border-radius: 1rem;
+        border: 1px solid var(--glass-border);
+        background: var(--glass-bg);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        box-shadow: 0 8px 32px rgba(0, 145, 68, 0.12),
+          inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+      }
+
+      .panel {
+        padding: 1.5rem;
+      }
+
+      @media (min-width: 640px) {
+        .panel.wide {
+          padding: 2rem;
+        }
+      }
+
+      .intro-label {
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: rgba(167, 243, 208, 0.95);
+        margin: 0 0 0.75rem;
+      }
+
+      .intro-body {
+        text-align: center;
+        margin: 0;
+        font-size: 0.875rem;
+        line-height: 1.65;
+        color: rgba(236, 253, 245, 0.95);
+        text-wrap: pretty;
+      }
+
+      @media (min-width: 640px) {
+        .intro-body {
+          font-size: 1rem;
+        }
+      }
+
+      .intro-body strong {
+        color: #fff;
+ font-weight: 600;
+      }
+
+      .btn-row {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+      }
+
+      @media (min-width: 640px) {
+        .btn-row.split {
+          flex-direction: row;
+          flex-wrap: wrap;
+        }
+        .btn-row.split .btn {
+          flex: 1;
+          min-width: 12rem;
+        }
+      }
+
+      .btn {
+        display: block;
+        width: 100%;
+        min-height: 48px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: filter 0.15s ease, transform 0.1s ease;
+      }
+
+      .btn:active {
+        transform: scale(0.99);
+      }
+
+      .btn-primary {
+        color: #fff;
+        background: linear-gradient(135deg, var(--ogsc-green), var(--ogsc-green-deep));
+        box-shadow: 0 4px 24px rgba(0, 177, 79, 0.35);
+      }
+
+      .btn-primary:hover {
+        filter: brightness(1.08);
+      }
+
+      .btn-ghost {
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(12px);
+      }
+
+      .btn-ghost:hover {
+        background: rgba(255, 255, 255, 0.22);
+      }
+
+      .progress-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        padding: 0.75rem 1rem;
+      }
+
+      @media (min-width: 640px) {
+        .progress-wrap {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+      }
+
+      .progress-meta {
+        font-size: 0.875rem;
+        color: rgba(209, 250, 229, 0.95);
+      }
+
+      .progress-meta strong {
+        color: #fff;
+      }
+
+      .progress-pct {
+        font-size: 0.875rem;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        color: #a7f3d0;
+      }
+
+      .bar-track {
+        height: 0.625rem;
+        border-radius: 9999px;
+        background: rgba(6, 47, 32, 0.6);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+        margin-bottom: 1.25rem;
+      }
+
+      .bar-fill {
+        height: 100%;
+        border-radius: 9999px;
+        background: linear-gradient(90deg, var(--ogsc-green), #4ade80);
+        box-shadow: 0 0 12px rgba(74, 222, 128, 0.45);
+        transition: width 0.45s ease;
+      }
+
+      @keyframes ogsc-fade-in {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .quiz-question-animate {
+        animation: ogsc-fade-in 0.4s ease-out both;
+      }
+
+      .q-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        line-height: 1.35;
+        color: #fff;
+        margin: 0 0 1rem;
+      }
+
+      @media (min-width: 640px) {
+        .q-title {
+          font-size: 1.25rem;
+        }
+      }
+
+      .options {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .opt-btn {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        width: 100%;
+        min-height: 48px;
+        padding: 1rem;
+        text-align: left;
+        font-size: 0.875rem;
+        line-height: 1.55;
+        color: rgba(236, 253, 245, 0.98);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 0.75rem;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(12px);
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+      }
+
+      @media (min-width: 640px) {
+        .opt-btn {
+          font-size: 1rem;
+        }
+      }
+
+      .opt-btn:hover {
+        border-color: rgba(110, 231, 183, 0.45);
+        background: rgba(255, 255, 255, 0.16);
+      }
+
+      .opt-btn:active {
+        transform: scale(0.99);
+      }
+
+      .dot {
+        margin-top: 0.35rem;
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 9999px;
+        flex-shrink: 0;
+        background: var(--ogsc-green);
+        opacity: 0.85;
+      }
+
+      .link-back {
+        margin-top: 0.5rem;
+        min-height: 44px;
+        padding: 0;
+        border: none;
+        background: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #a7f3d0;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+        cursor: pointer;
+      }
+
+      .link-back:hover {
+        color: #fff;
+      }
+
+      .link-back:disabled {
+        opacity: 0.35;
+        pointer-events: none;
+      }
+
+      .result-label {
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: rgba(167, 243, 208, 0.9);
+        margin: 0;
+      }
+
+      .result-name {
+        text-align: center;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 0.5rem 0 0;
+      }
+
+      @media (min-width: 640px) {
+        .result-name {
+          font-size: 1.875rem;
+        }
+      }
+
+      .result-tagline {
+        text-align: center;
+        margin: 0.75rem 0 0;
+        font-size: 1rem;
+        font-style: italic;
+        font-weight: 500;
+        color: #d1fae5;
+        text-wrap: pretty;
+      }
+
+      @media (min-width: 640px) {
+        .result-tagline {
+          font-size: 1.125rem;
+        }
+      }
+
+      .result-card {
+        overflow: hidden;
+        margin-top: 1.25rem;
+      }
+
+      .result-img-wrap {
+        padding: 0.75rem;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), transparent);
+      }
+
+      @media (min-width: 640px) {
+        .result-img-wrap {
+          padding: 1rem;
+        }
+      }
+
+      .result-img-wrap img {
+        display: block;
+        margin: 0 auto;
+        max-width: 100%;
+        max-height: min(52vh, 420px);
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.25));
+      }
+
+      @media (min-width: 640px) {
+        .result-img-wrap img {
+          max-height: min(48vh, 480px);
+        }
+      }
+
+      .result-desc {
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 1.25rem 1.25rem 1.5rem;
+      }
+
+      @media (min-width: 640px) {
+        .result-desc {
+          padding: 1.25rem 1.5rem 1.5rem;
+        }
+      }
+
+      .result-desc-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: rgba(167, 243, 208, 0.9);
+        margin: 0 0 0.5rem;
+      }
+
+      .result-desc p {
+        margin: 0;
+        font-size: 0.875rem;
+        line-height: 1.65;
+        color: rgba(236, 253, 245, 0.95);
+        text-wrap: pretty;
+      }
+
+      @media (min-width: 640px) {
+        .result-desc p {
+          font-size: 1rem;
+        }
+      }
+
+      details.glass {
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+      }
+
+      details.glass summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: #fff;
+        user-select: none;
+      }
+
+      .breakdown {
+        list-style: none;
+        padding: 0.75rem 0 0;
+        margin: 0.75rem 0 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .breakdown li {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.35rem 0;
+        font-size: 0.875rem;
+        color: rgba(209, 250, 229, 0.95);
+      }
+
+      .breakdown .score {
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        color: #fff;
+      }
+
+      .share-hint {
+        text-align: center;
+        font-size: 0.75rem;
+        color: rgba(167, 243, 208, 0.95);
+        margin: 0.5rem 0 0;
+      }
+
+      footer.note {
+        margin-top: 2rem;
+        text-align: center;
+        font-size: 0.75rem;
+        color: rgba(167, 243, 208, 0.8);
+      }
+
+      .section {
+        display: none;
+      }
+
+      .section.is-active {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-accent" aria-hidden="true"></div>
+    <div class="wrap">
+      <header class="masthead">
+        <p class="eyebrow">OGSC</p>
+        <h1>Character Discovery</h1>
+        <p class="sub">
+          Weekly Challenge #4 — fifteen quick questions, five OGSC characters. Let’s find yours.
+        </p>
+      </header>
+
+      <main id="main"></main>
+
+      <footer class="note">Grab Green · OGSC Weekly Challenge #4 · Character Discovery</footer>
+    </div>
+
+    <script>
+      (function () {
+        var STEADY = 'Steady & Petty (In a Good Way)'
+
+        var CHARACTER_ORDER = [
+          'Day-1 Overachiever',
+          'Procrastination Podium Champ',
+          'Trend-Snatcher',
+          'Incentive Goblin',
+          STEADY,
+        ]
+
+        var STEADY_IMAGE_FILE = 'Steady & Petty (In a Good Way).png'
+
+        var RESULTS = {
+          'Day-1 Overachiever': {
+            name: 'Day-1 Overachiever',
+            description: 'You sprint on Day 1 like it owes you money.',
+            tagline: '“Finished early? Obviously.',
+            imageFile: 'Day-1 Overachiever.png',
+            imageAlt: 'OGSC Character: Day-1 Overachiever',
+          },
+          'Procrastination Podium Champ': {
+            name: 'Procrastination Podium Champ',
+            description: 'You wait… until “last minute” becomes your brand identity.',
+            tagline: '“If it’s not stressing me out, is it even real?"',
+            imageFile: 'Procrastination Podium Champ.png',
+            imageAlt: 'OGSC Character: Procrastination Podium Champ',
+          },
+          'Trend-Snatcher': {
+            name: 'Trend-Snatcher',
+            description:
+              'If it’s trending, you’re already in it—like you personally authored the hype.',
+            tagline: '“Don’t chase it. Become it.”',
+            imageFile: 'Trend-Snatcher.png',
+            imageAlt: 'OGSC Character: Trend-Snatcher',
+          },
+          'Incentive Goblin': {
+            name: 'Incentive Goblin',
+            description:
+              'You’re down, but only if there’s a reward. Points? Perks? Respect? Delivered?',
+            tagline: '“Motivation must be paid in snacks/awards.”',
+            imageFile: 'Incentive Goblin.png',
+            imageAlt: 'OGSC Character: Incentive Goblin',
+          },
+        }
+        RESULTS[STEADY] = {
+          name: STEADY,
+          description:
+            'You build it step-by-step, quietly collecting wins while others panic-scroll.',
+          tagline: '“I don’t rush. I outsmart deadlines.”',
+          imageFile: STEADY_IMAGE_FILE,
+          imageAlt: 'OGSC Character: Steady & Petty (In a Good Way)',
+        }
+
+        var QUESTIONS = [
+          {
+            id: 1,
+            prompt:
+              'A major project is announced on Monday. What does your Monday afternoon look like?',
+            options: [
+              {
+                text: 'It’s already 50% done. I want my week clear for closing deals.',
+                characterId: 'Day-1 Overachiever',
+              },
+              {
+                text: 'I’m ignoring the brief until I absolutely have to read it.',
+                characterId: 'Procrastination Podium Champ',
+              },
+              {
+                text: "I’m deep-diving into the new campaign's internal Hype Kit and GrabX docs.",
+                characterId: 'Trend-Snatcher',
+              },
+            ],
+          },
+          {
+            id: 2,
+            prompt: 'How do you feel about working right up against a deadline?',
+            options: [
+              {
+                text: 'I hate it. I finish early to avoid the stress.',
+                characterId: 'Day-1 Overachiever',
+              },
+              {
+                text: 'That is when my brain finally wakes up and does its best work.',
+                characterId: 'Procrastination Podium Champ',
+              },
+              {
+                text: 'I’m usually done by then because I stay on a consistent schedule.',
+                characterId: STEADY,
+              },
+            ],
+          },
+          {
+            id: 3,
+            prompt: 'What is your relationship with your alarm clock?',
+            options: [
+              {
+                text: 'I’m up before it. The early bird gets the lead.',
+                characterId: 'Day-1 Overachiever',
+              },
+              {
+                text: 'I hit snooze until the panic of being late finally sets in.',
+                characterId: 'Procrastination Podium Champ',
+              },
+              {
+                text: 'I don’t need an alarm; my routine is a finely tuned machine.',
+                characterId: STEADY,
+              },
+            ],
+          },
+          {
+            id: 4,
+            prompt: 'When do you feel most "alive" during a task?',
+            options: [
+              {
+                text: 'The second I click "submit" way before anyone else.',
+                characterId: 'Day-1 Overachiever',
+              },
+              {
+                text: 'When the clock is ticking and I’m pulling a masterpiece out of thin air.',
+                characterId: 'Procrastination Podium Champ',
+              },
+              {
+                text: 'When I’m using a new AI tool or strategy before the rest of the team.',
+                characterId: 'Trend-Snatcher',
+              },
+            ],
+          },
+          {
+            id: 5,
+            prompt: 'Would you finish a Sales Enablement module if there was no badge?',
+            options: [
+              {
+                text: 'Yes—I just want it off my plate and out of the way.',
+                characterId: 'Day-1 Overachiever',
+              },
+              {
+                text: 'Only if there’s a reward (GrabVouchers or Points) at the end.',
+                characterId: 'Incentive Goblin',
+              },
+              {
+                text: 'Only if it gives me a competitive advantage in my next sales pitch.',
+                characterId: 'Trend-Snatcher',
+              },
+            ],
+          },
+          {
+            id: 6,
+            prompt: 'You see a new "Battlecard" or "Pitch Deck" shared in the group chat. You:',
+            options: [
+              {
+                text: 'Already saved it and used it in a client call this morning.',
+                characterId: 'Trend-Snatcher',
+              },
+              {
+                text: 'Will look at it eventually... probably right before my next meeting.',
+                characterId: 'Procrastination Podium Champ',
+              },
+              {
+                text: 'Check if there is an incentive or commission benefit for using it.',
+                characterId: 'Incentive Goblin',
+              },
+            ],
+          },
+          {
+            id: 7,
+            prompt: 'What motivates you more: a top-tier reward or a peaceful weekend?',
+            options: [
+              {
+                text: 'The reward. I want the hardware and the prizes.',
+                characterId: 'Incentive Goblin',
+              },
+              {
+                text: 'A peaceful weekend—which is why I finish early.',
+                characterId: 'Day-1 Overachiever',
+              },
+              {
+                text: 'Being the expert who knows things before they are officially announced.',
+                characterId: 'Trend-Snatcher',
+              },
+            ],
+          },
+          {
+            id: 8,
+            prompt: 'Someone offers you a "Mystery Box" if you finish a task in 30 minutes. You:',
+            options: [
+              {
+                text: 'Drop everything. I love winning—whatever the prize is.',
+                characterId: 'Incentive Goblin',
+              },
+              { text: 'Ignore it. I have a methodical schedule to maintain.', characterId: STEADY },
+              {
+                text: 'Sprint to finish because I love the challenge of being first.',
+                characterId: 'Day-1 Overachiever',
+              },
+            ],
+          },
+          {
+            id: 9,
+            prompt: 'Your digital workspace (desktop/tabs) looks like:',
+            options: [
+              {
+                text: 'Pristine. Completed tasks are filed and archived.',
+                characterId: 'Day-1 Overachiever',
+              },
+              {
+                text: 'A total disaster of open tabs and sticky notes.',
+                characterId: 'Procrastination Podium Champ',
+              },
+              {
+                text: 'Highly curated with the latest productivity apps and internal shortcuts.',
+                characterId: 'Trend-Snatcher',
+              },
+            ],
+          },
+          {
+            id: 10,
+            prompt: 'How do you handle a teammate who is falling behind on a deadline?',
+            options: [
+              {
+                text: 'I finish my work early so I can jump in and help.',
+                characterId: 'Day-1 Overachiever',
+              },
+              {
+                text: 'I stay focused on my own steady pace and my own targets.',
+                characterId: STEADY,
+              },
+              {
+                text: 'I send them the sales methodologies and frameworks provided by Enablement.',
+                characterId: 'Trend-Snatcher',
+              },
+            ],
+          },
+          {
+            id: 11,
+            prompt: '"Done is better than perfect." Do you agree?',
+            options: [
+              {
+                text: 'Agree. Get the win and move to the next.',
+                characterId: 'Day-1 Overachiever',
+              },
+              {
+                text: 'No. It must be a high-pressure masterpiece even if it’s late.',
+                characterId: 'Procrastination Podium Champ',
+              },
+              {
+                text: 'I build it step-by-step to be both high quality and on time.',
+                characterId: STEADY,
+              },
+            ],
+          },
+          {
+            id: 12,
+            prompt: 'What’s your "Power Song" for a long day?',
+            options: [
+              {
+                text: 'High-tempo EDM to keep my sprint speed up.',
+                characterId: 'Day-1 Overachiever',
+              },
+              { text: 'Silence or Lo-fi for my steady quiet focus.', characterId: STEADY },
+              { text: 'Whatever is currently #1 on Spotify.', characterId: 'Trend-Snatcher' },
+            ],
+          },
+          {
+            id: 13,
+            prompt: 'In a group project you are the person who:',
+            options: [
+              {
+                text: 'Submits their part immediately to get it over with.',
+                characterId: 'Day-1 Overachiever',
+              },
+              {
+                text: 'Submits their part at the very last second possible.',
+                characterId: 'Procrastination Podium Champ',
+              },
+              {
+                text: 'Ensures we are aligning with the Grab 4H pillars (Heart Hunger Honour Humility).',
+                characterId: 'Trend-Snatcher',
+              },
+            ],
+          },
+          {
+            id: 14,
+            prompt: 'How do you react if you miss a deadline and lose your "Active" status/streak?',
+            options: [
+              {
+                text: "It wouldn't happen; I'm never late.",
+                characterId: 'Day-1 Overachiever',
+              },
+              {
+                text: "I'm used to it—I'll just catch up on the next one.",
+                characterId: 'Procrastination Podium Champ',
+              },
+              {
+                text: "I'll avoid it at all costs—I don't want to lose out on my rewards.",
+                characterId: 'Incentive Goblin',
+              },
+            ],
+          },
+          {
+            id: 15,
+            prompt: 'Pick a tagline that resonates with your sales soul:',
+            options: [
+              { text: 'Eat my dust.', characterId: 'Day-1 Overachiever' },
+              {
+                text: 'Diamonds are made under pressure.',
+                characterId: 'Procrastination Podium Champ',
+              },
+              {
+                text: 'Knowledge is power but being the first to know is everything.',
+                characterId: 'Trend-Snatcher',
+              },
+            ],
+          },
+        ]
+
+        function tallyCharacters(answers) {
+          var counts = {}
+          for (var i = 0; i < CHARACTER_ORDER.length; i++) {
+            counts[CHARACTER_ORDER[i]] = 0
+          }
+          for (var j = 0; j < answers.length; j++) {
+            var a = answers[j]
+            if (a && counts[a] !== undefined) counts[a] += 1
+          }
+          return counts
+        }
+
+        function winnerFromTally(counts) {
+          var winner = CHARACTER_ORDER[0]
+          var best = -1
+          for (var i = 0; i < CHARACTER_ORDER.length; i++) {
+            var key = CHARACTER_ORDER[i]
+            var n = counts[key] != null ? counts[key] : 0
+            if (n > best) {
+              best = n
+              winner = key
+            }
+          }
+          return winner
+        }
+
+        function imageUrl(fileName) {
+          return './' + encodeURIComponent(fileName)
+        }
+
+        function buildShareMessage(characterName, tagline) {
+          var link = typeof location !== 'undefined' && location.href ? location.href : ''
+          return (
+            "I'm a " +
+            characterName +
+            '! Tagline: ' +
+            tagline +
+            '. Find your OGSC Character here: ' +
+            link
+          )
+        }
+
+        var main = document.getElementById('main')
+        var phase = 'welcome'
+        var step = 0
+        var answers = []
+        var shareTimer = null
+
+        function emptyAnswers() {
+          var a = []
+          for (var i = 0; i < QUESTIONS.length; i++) a.push(null)
+          return a
+        }
+
+        function reset() {
+          phase = 'welcome'
+          step = 0
+          answers = emptyAnswers()
+          if (shareTimer) clearTimeout(shareTimer)
+          render()
+        }
+
+        function start() {
+          phase = 'quiz'
+          step = 0
+          answers = emptyAnswers()
+          render()
+        }
+
+        function choose(characterId) {
+          var next = answers.slice()
+          next[step] = characterId
+          for (var i = step + 1; i < QUESTIONS.length; i++) next[i] = null
+          answers = next
+          if (step >= QUESTIONS.length - 1) {
+            phase = 'results'
+            render()
+            return
+          }
+          step += 1
+          render()
+        }
+
+        function goBack() {
+          if (step <= 0) return
+          step -= 1
+          render()
+        }
+
+        function shareToSlack() {
+          var winnerId = winnerFromTally(tallyCharacters(answers))
+          var result = RESULTS[winnerId]
+          if (!result) return
+          var text = buildShareMessage(result.name, result.tagline)
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () {
+              var hint = document.getElementById('share-hint')
+              if (hint) {
+                hint.textContent = 'Copied — paste into Slack to share.'
+                hint.hidden = false
+              }
+              if (shareTimer) clearTimeout(shareTimer)
+              shareTimer = setTimeout(function () {
+                if (hint) hint.hidden = true
+              }, 3500)
+            })
+          } else {
+            window.prompt('Copy this message for Slack:', text)
+          }
+        }
+
+        function esc(s) {
+          return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+        }
+
+        function renderWelcome() {
+          return (
+            '<section class="section is-active" aria-label="Welcome">' +
+            '<div class="glass panel wide">' +
+            '<p class="intro-label">OGSC Weekly Challenge #4</p>' +
+            '<p class="intro-body">Welcome to the <strong>OGSC Character Discovery</strong> ' +
+            'challenge—professional, a little playful, and built for how we actually work on the floor. ' +
+            'Answer each scenario honestly; we tally your picks and match you to one of five OGSC ' +
+            'characters. Tap start when you’re ready to play.</p>' +
+            '</div>' +
+            '<button type="button" class="btn btn-primary" id="btn-start">Start challenge</button>' +
+            '</section>'
+          )
+        }
+
+        function renderQuiz() {
+          var q = QUESTIONS[step]
+          var total = QUESTIONS.length
+          var pct = Math.round(((step + 1) / total) * 100)
+          var opts = ''
+          for (var i = 0; i < q.options.length; i++) {
+            var o = q.options[i]
+            opts +=
+              '<li><button type="button" class="opt-btn" data-character="' +
+              esc(o.characterId) +
+              '"><span class="dot" aria-hidden="true"></span><span>' +
+              esc(o.text) +
+              '</span></button></li>'
+          }
+          return (
+            '<section class="section is-active" aria-label="Quiz">' +
+            '<div class="glass progress-wrap"><span class="progress-meta">Question <strong>' +
+            (step + 1) +
+            '</strong> of ' +
+            total +
+            '</span><span class="progress-pct">' +
+            pct +
+            '%</span></div>' +
+            '<div class="bar-track" role="progressbar" aria-valuemin="1" aria-valuemax="' +
+            total +
+            '" aria-valuenow="' +
+            (step + 1) +
+            '" aria-label="Question ' +
+            (step + 1) +
+            ' of ' +
+            total +
+            '"><div class="bar-fill" style="width:' +
+            pct +
+            '%"></div></div>' +
+            '<div class="quiz-question-animate">' +
+            '<h2 class="q-title">' +
+            esc(q.prompt) +
+            '</h2><ul class="options">' +
+            opts +
+            '</ul></div>' +
+            '<button type="button" class="link-back" id="btn-back"' +
+            (step === 0 ? ' disabled' : '') +
+            '>Back</button>' +
+            '</section>'
+          )
+        }
+
+        function renderResults() {
+          var tally = tallyCharacters(answers)
+          var winnerId = winnerFromTally(tally)
+          var result = RESULTS[winnerId]
+          if (!result) return ''
+
+          var breakdown = ''
+          for (var i = 0; i < CHARACTER_ORDER.length; i++) {
+            var id = CHARACTER_ORDER[i]
+            var r = RESULTS[id]
+            breakdown +=
+              '<li><span>' +
+              esc(r.name) +
+              '</span><span class="score">' +
+              (tally[id] || 0) +
+              '</span></li>'
+          }
+
+          return (
+            '<section class="section is-active" aria-label="Your result">' +
+            '<p class="result-label">Your OGSC character</p>' +
+            '<h2 class="result-name">' +
+            esc(result.name) +
+            '</h2>' +
+            '<p class="result-tagline">' +
+            esc(result.tagline) +
+            '</p>' +
+            '<div class="glass result-card">' +
+            '<div class="result-img-wrap"><img src="' +
+            esc(imageUrl(result.imageFile)) +
+            '" alt="' +
+            esc(result.imageAlt) +
+            '" loading="lazy" width="480" height="480" /></div>' +
+            '<div class="result-desc">' +
+            '<p class="result-desc-label">About you</p>' +
+            '<p>' +
+            esc(result.description) +
+            '</p></div></div>' +
+            '<details class="glass"><summary>Score breakdown</summary><ul class="breakdown">' +
+            breakdown +
+            '</ul></details>' +
+            '<div class="btn-row split">' +
+            '<button type="button" class="btn btn-ghost" id="btn-slack">Share to Slack</button>' +
+            '<button type="button" class="btn btn-primary" id="btn-again">Take challenge again</button>' +
+            '</div>' +
+            '<p class="share-hint" id="share-hint" hidden role="status"></p>' +
+            '</section>'
+          )
+        }
+
+        function render() {
+          var html = ''
+          if (phase === 'welcome') html = renderWelcome()
+          else if (phase === 'quiz') html = renderQuiz()
+          else html = renderResults()
+          main.innerHTML = html
+
+          var btnStart = document.getElementById('btn-start')
+          if (btnStart) btnStart.addEventListener('click', start)
+
+          var btnBack = document.getElementById('btn-back')
+          if (btnBack) btnBack.addEventListener('click', goBack)
+
+          var btns = main.querySelectorAll('.opt-btn[data-character]')
+          for (var i = 0; i < btns.length; i++) {
+            btns[i].addEventListener('click', function (e) {
+              var id = e.currentTarget.getAttribute('data-character')
+              choose(id)
+            })
+          }
+
+          var btnSlack = document.getElementById('btn-slack')
+          if (btnSlack) btnSlack.addEventListener('click', shareToSlack)
+
+          var btnAgain = document.getElementById('btn-again')
+          if (btnAgain) btnAgain.addEventListener('click', reset)
+        }
+
+        answers = emptyAnswers()
+        render()
+      })()
+    </script>
+  </body>
+</html>

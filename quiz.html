@@ -145,7 +145,73 @@
 
       .intro-body strong {
         color: #fff;
- font-weight: 600;
+        font-weight: 600;
+      }
+
+      .field-group {
+        margin-top: 1.25rem;
+        text-align: left;
+      }
+
+      .email-label {
+        display: block;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: rgba(236, 253, 245, 0.95);
+        margin-bottom: 0.35rem;
+      }
+
+      .email-input {
+        width: 100%;
+        min-height: 48px;
+        padding: 0.65rem 0.85rem;
+        font-size: 1rem;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        background: rgba(6, 47, 32, 0.45);
+        color: #fff;
+        outline: none;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .email-input::placeholder {
+        color: rgba(167, 243, 208, 0.55);
+      }
+
+      .email-input:focus {
+        border-color: rgba(0, 177, 79, 0.65);
+        box-shadow: 0 0 0 3px rgba(0, 177, 79, 0.2);
+      }
+
+      .email-input[aria-invalid='true'] {
+        border-color: rgba(252, 165, 165, 0.8);
+      }
+
+      .field-hint {
+        margin: 0.4rem 0 0;
+        font-size: 0.75rem;
+        line-height: 1.45;
+        color: rgba(167, 243, 208, 0.85);
+      }
+
+      .field-error {
+        margin: 0.5rem 0 0;
+        font-size: 0.8125rem;
+        color: #fecaca;
+      }
+
+      .track-status {
+        text-align: center;
+        font-size: 0.75rem;
+        color: rgba(167, 243, 208, 0.9);
+        margin: 0.5rem 0 0;
+      }
+
+      .completed-as {
+        text-align: center;
+        font-size: 0.8125rem;
+        color: rgba(167, 243, 208, 0.88);
+        margin: 0.65rem 0 0;
       }
 
       .btn-row {
@@ -541,6 +607,13 @@
 
     <script>
       (function () {
+        /**
+         * Completion tracking: set to your form/webhook URL (Formspree, Google Apps Script, etc.).
+         * POST body is JSON: { email, character, characterId, tagline, completedAt, source }.
+         * Leave '' to collect email in the quiz only (no network request).
+         */
+        var TRACKING_ENDPOINT = ''
+
         var STEADY = 'Steady & Petty (In a Good Way)'
 
         var CHARACTER_ORDER = [
@@ -903,6 +976,7 @@
         var step = 0
         var answers = []
         var shareTimer = null
+        var userEmail = ''
 
         function emptyAnswers() {
           var a = []
@@ -919,6 +993,43 @@
         }
 
         function start() {
+          var input = document.getElementById('email')
+          var errEl = document.getElementById('email-error')
+          if (!input) {
+            phase = 'quiz'
+            step = 0
+            answers = emptyAnswers()
+            render()
+            return
+          }
+          var raw = input.value.trim()
+          input.value = raw
+          if (!raw) {
+            input.setAttribute('aria-invalid', 'true')
+            if (errEl) {
+              errEl.hidden = false
+              errEl.textContent = 'Please enter your work email to continue.'
+            }
+            input.focus()
+            return
+          }
+          if (typeof input.checkValidity === 'function' && !input.checkValidity()) {
+            input.setAttribute('aria-invalid', 'true')
+            if (errEl) {
+              errEl.hidden = false
+              errEl.textContent = 'Please enter a valid email address.'
+            }
+            input.focus()
+            return
+          }
+          input.setAttribute('aria-invalid', 'false')
+          if (errEl) errEl.hidden = true
+
+          userEmail = raw
+          try {
+            sessionStorage.setItem('ogsc_quiz_email', raw)
+          } catch (e) {}
+
           phase = 'quiz'
           step = 0
           answers = emptyAnswers()
@@ -984,6 +1095,13 @@
             'challenge—professional, a little playful, and built for how we actually work on the floor. ' +
             'Answer each scenario honestly; we tally your picks and match you to one of five OGSC ' +
             'characters. Tap start when you’re ready to play.</p>' +
+            '<div class="field-group">' +
+            '<label class="email-label" for="email">Work email</label>' +
+            '<input class="email-input" type="email" id="email" name="email" autocomplete="email" ' +
+            'inputmode="email" spellcheck="false" placeholder="you@company.com" />' +
+            '<p class="field-hint">We use this only to record who completed the challenge (OGSC tracking).</p>' +
+            '<p class="field-error" id="email-error" hidden role="alert"></p>' +
+            '</div>' +
             '</div>' +
             '<button type="button" class="btn btn-primary" id="btn-start">Start challenge</button>' +
             '</section>'
@@ -1064,6 +1182,9 @@
             '<p class="result-tagline">' +
             esc(result.tagline) +
             '</p>' +
+            (userEmail
+              ? '<p class="completed-as">Completed as: ' + esc(userEmail.trim()) + '</p>'
+              : '') +
             '<div class="glass result-card">' +
             '<div class="result-img-wrap"><img src="' +
             esc(imageUrl(result.imageFile)) +
@@ -1083,8 +1204,69 @@
             '<button type="button" class="btn btn-primary" id="btn-again">Take challenge again</button>' +
             '</div>' +
             '<p class="share-hint" id="share-hint" hidden role="status"></p>' +
+            '<p class="track-status" id="track-status" hidden role="status"></p>' +
             '</section>'
           )
+        }
+
+        function completionSignature() {
+          return (
+            userEmail.trim().toLowerCase() +
+            '::' +
+            answers.join('|')
+          )
+        }
+
+        function trackCompletion() {
+          if (!userEmail || !TRACKING_ENDPOINT) return
+          var winnerId = winnerFromTally(tallyCharacters(answers))
+          var result = RESULTS[winnerId]
+          if (!result) return
+
+          var sig = completionSignature()
+          try {
+            if (sessionStorage.getItem('ogsc_quiz_logged') === sig) return
+          } catch (e) {}
+
+          var payload = {
+            email: userEmail.trim(),
+            character: result.name,
+            characterId: winnerId,
+            tagline: result.tagline,
+            completedAt: new Date().toISOString(),
+            source: 'OGSC Character Discovery — Weekly Challenge #4',
+          }
+
+          fetch(TRACKING_ENDPOINT, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
+            },
+            body: JSON.stringify(payload),
+          })
+            .then(function (res) {
+              var el = document.getElementById('track-status')
+              if (res.ok) {
+                try {
+                  sessionStorage.setItem('ogsc_quiz_logged', sig)
+                } catch (err) {}
+                if (el) {
+                  el.hidden = false
+                  el.textContent = 'Thanks — your completion was recorded.'
+                }
+              } else if (el) {
+                el.hidden = false
+                el.textContent = 'Could not confirm logging. Your result is still shown below.'
+              }
+            })
+            .catch(function () {
+              var el = document.getElementById('track-status')
+              if (el) {
+                el.hidden = false
+                el.textContent = 'Offline or blocked — completion may not have been logged.'
+              }
+            })
         }
 
         function render() {
@@ -1093,6 +1275,16 @@
           else if (phase === 'quiz') html = renderQuiz()
           else html = renderResults()
           main.innerHTML = html
+
+          if (phase === 'welcome') {
+            var emailInput = document.getElementById('email')
+            if (emailInput) {
+              try {
+                var saved = sessionStorage.getItem('ogsc_quiz_email')
+                if (saved) emailInput.value = saved
+              } catch (e) {}
+            }
+          }
 
           var btnStart = document.getElementById('btn-start')
           if (btnStart) btnStart.addEventListener('click', start)
@@ -1113,6 +1305,8 @@
 
           var btnAgain = document.getElementById('btn-again')
           if (btnAgain) btnAgain.addEventListener('click', reset)
+
+          if (phase === 'results') trackCompletion()
         }
 
         answers = emptyAnswers()

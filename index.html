@@ -3,14 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="refresh" content="0; url=quiz.html" />
     <meta
       name="description"
       content="OGSC Weekly Challenge #4 — discover your OGSC Character."
     />
     <title>OGSC Character Discovery</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 2rem;
+        text-align: center;
+        color: #333;
+      }
+      a {
+        color: #00b14f;
+      }
+    </style>
   </head>
-  <body class="antialiased">
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+  <body>
+    <p>Loading quiz…</p>
+    <p>If you are not redirected, <a href="quiz.html">open the quiz here</a>.</p>
+    <script>
+      location.replace('quiz.html')
+    </script>
   </body>
 </html>

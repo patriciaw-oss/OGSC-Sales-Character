@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-store, max-age=0" />
+    <meta name="ogsc-quiz-build" content="form-post-v2" />
     <title>OGSC Character Discovery</title>
     <style>
       :root {
@@ -602,15 +604,25 @@
 
       <main id="main"></main>
 
-      <footer class="note">Grab Green · OGSC Weekly Challenge #4 · Character Discovery</footer>
+      <footer class="note">
+        Grab Green · OGSC Weekly Challenge #4 · Character Discovery · Quiz build <span id="quiz-build-id">form-post-v2</span>
+      </footer>
     </div>
+
+    <!-- Google Apps Script loggers often block fetch(); a real form POST still runs doPost. -->
+    <iframe
+      name="ogsc-sheet-logger"
+      title="Sheet logger"
+      style="position: absolute; width: 0; height: 0; border: 0; left: 0; top: 0; clip: rect(0, 0, 0, 0)"
+      aria-hidden="true"
+    ></iframe>
 
     <script>
       (function () {
         /**
-         * Google Sheets logging: deploy google-sheets-apps-script/Code.gs as a Web app
-         * (Deploy → Web app → Execute as: Me, Who has access: Anyone), then paste the
-         * /exec URL here. POST uses text/plain body (JSON) for compatibility with Apps Script.
+         * Google Sheets: Web app /exec URL (Workspace URLs are fine).
+         * Logging uses a hidden HTML form POST — not fetch — so CORS on fetch() does not apply.
+         * If you still see "Network or CORS…" you are running an old quiz file: re-upload this HTML.
          */
         var TRACKING_ENDPOINT = 'https://script.google.com/a/macros/grabtaxi.com/s/AKfycbwXR0HE9193BVDIyqrhTCkeFbYZpc_ug46fwTVZM2bT9bqu1yHkweHuR8jDwItbBbpk/exec'
 
@@ -977,6 +989,8 @@
         var answers = []
         var shareTimer = null
         var userEmail = ''
+        /** Prevents duplicate form submits on the same result screen. */
+        var lastSheetSubmitSig = null
 
         function emptyAnswers() {
           var a = []
@@ -988,6 +1002,7 @@
           phase = 'welcome'
           step = 0
           answers = emptyAnswers()
+          lastSheetSubmitSig = null
           if (shareTimer) clearTimeout(shareTimer)
           render()
         }
@@ -996,6 +1011,7 @@
           var input = document.getElementById('email')
           var errEl = document.getElementById('email-error')
           if (!input) {
+            lastSheetSubmitSig = null
             phase = 'quiz'
             step = 0
             answers = emptyAnswers()
@@ -1030,6 +1046,7 @@
             sessionStorage.setItem('ogsc_quiz_email', raw)
           } catch (e) {}
 
+          lastSheetSubmitSig = null
           phase = 'quiz'
           step = 0
           answers = emptyAnswers()
@@ -1217,6 +1234,22 @@
           )
         }
 
+        /** Some hosts strip static iframes; recreate so form.target always exists. */
+        function ensureSheetLoggerFrame() {
+          var f = document.querySelector('iframe[name="ogsc-sheet-logger"]')
+          if (f) return f
+          f = document.createElement('iframe')
+          f.setAttribute('name', 'ogsc-sheet-logger')
+          f.setAttribute('title', 'Sheet logger')
+          f.setAttribute(
+            'style',
+            'position:absolute;width:0;height:0;border:0;left:0;top:0;clip:rect(0,0,0,0)'
+          )
+          f.setAttribute('aria-hidden', 'true')
+          document.body.appendChild(f)
+          return f
+        }
+
         function trackCompletion() {
           if (!userEmail || !TRACKING_ENDPOINT) return
           var winnerId = winnerFromTally(tallyCharacters(answers))
@@ -1224,9 +1257,7 @@
           if (!result) return
 
           var sig = completionSignature()
-          try {
-            if (sessionStorage.getItem('ogsc_quiz_logged') === sig) return
-          } catch (e) {}
+          if (lastSheetSubmitSig === sig) return
 
           var payload = {
             email: userEmail.trim(),
@@ -1237,66 +1268,38 @@
             source: 'OGSC Character Discovery — Weekly Challenge #4',
           }
 
-          var elAfter = function () {
-            return document.getElementById('track-status')
+          var el = document.getElementById('track-status')
+          if (!el) el = main.querySelector('#track-status')
+          try {
+            ensureSheetLoggerFrame()
+            var form = document.createElement('form')
+            form.method = 'POST'
+            form.action = TRACKING_ENDPOINT
+            form.target = 'ogsc-sheet-logger'
+            form.acceptCharset = 'UTF-8'
+            var inp = document.createElement('input')
+            inp.type = 'hidden'
+            inp.name = 'payload'
+            inp.value = JSON.stringify(payload)
+            form.appendChild(inp)
+            document.body.appendChild(form)
+            form.submit()
+            document.body.removeChild(form)
+            lastSheetSubmitSig = sig
+            if (el) {
+              el.hidden = false
+              el.textContent =
+                'Submitted to the team sheet. Check the spreadsheet for a new row; if nothing appears, open Apps Script → Executions for errors.'
+            }
+          } catch (err) {
+            if (el) {
+              el.hidden = false
+              el.textContent = 'Could not submit to the sheet. Try again or contact your admin.'
+            }
+            if (typeof console !== 'undefined' && console.warn) {
+              console.warn('[OGSC quiz] form submit error:', err)
+            }
           }
-
-          fetch(TRACKING_ENDPOINT, {
-            method: 'POST',
-            redirect: 'follow',
-            headers: {
-              'Content-Type': 'text/plain;charset=utf-8',
-            },
-            body: JSON.stringify(payload),
-          })
-            .then(function (res) {
-              return res.text().then(function (text) {
-                var data = null
-                try {
-                  data = JSON.parse(text)
-                } catch (e) {}
-                var el = elAfter()
-                /** Must require JSON ok — Google may return 200 HTML (sign-in / error page). */
-                var recorded = !!(data && data.ok === true)
-                if (recorded) {
-                  try {
-                    sessionStorage.setItem('ogsc_quiz_logged', sig)
-                  } catch (err) {}
-                  if (el) {
-                    el.hidden = false
-                    el.textContent = 'Thanks — your completion was saved to the team sheet.'
-                  }
-                  return
-                }
-                if (!el) return
-                el.hidden = false
-                if (data && data.error) {
-                  el.textContent = 'Sheet log error: ' + data.error
-                  return
-                }
-                var looksHtml = /^\s*</.test(text) || /<!DOCTYPE/i.test(text)
-                if (looksHtml || (res.ok && !data)) {
-                  el.textContent =
-                    'Could not reach the sheet logger (often: Web app must allow anonymous access, or you need a new deployment version). Check the browser console (F12) for details.'
-                  if (typeof console !== 'undefined' && console.warn) {
-                    console.warn('[OGSC quiz] Sheet logger response (first 500 chars):', text.slice(0, 500))
-                  }
-                  return
-                }
-                el.textContent = 'Could not confirm logging (HTTP ' + res.status + '). Your result is still shown below.'
-              })
-            })
-            .catch(function (err) {
-              var el = elAfter()
-              if (el) {
-                el.hidden = false
-                el.textContent =
-                  'Network or CORS blocked the sheet request. Host the quiz on https (not file://) and ensure the Apps Script URL ends in /exec.'
-              }
-              if (typeof console !== 'undefined' && console.warn) {
-                console.warn('[OGSC quiz] fetch error:', err)
-              }
-            })
         }
 
         function render() {

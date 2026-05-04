@@ -1237,6 +1237,10 @@
             source: 'OGSC Character Discovery — Weekly Challenge #4',
           }
 
+          var elAfter = function () {
+            return document.getElementById('track-status')
+          }
+
           fetch(TRACKING_ENDPOINT, {
             method: 'POST',
             redirect: 'follow',
@@ -1251,8 +1255,9 @@
                 try {
                   data = JSON.parse(text)
                 } catch (e) {}
-                var recorded = (data && data.ok === true) || res.ok
-                var el = document.getElementById('track-status')
+                var el = elAfter()
+                /** Must require JSON ok — Google may return 200 HTML (sign-in / error page). */
+                var recorded = !!(data && data.ok === true)
                 if (recorded) {
                   try {
                     sessionStorage.setItem('ogsc_quiz_logged', sig)
@@ -1261,17 +1266,35 @@
                     el.hidden = false
                     el.textContent = 'Thanks — your completion was saved to the team sheet.'
                   }
-                } else if (el) {
-                  el.hidden = false
-                  el.textContent = 'Could not confirm logging. Your result is still shown below.'
+                  return
                 }
+                if (!el) return
+                el.hidden = false
+                if (data && data.error) {
+                  el.textContent = 'Sheet log error: ' + data.error
+                  return
+                }
+                var looksHtml = /^\s*</.test(text) || /<!DOCTYPE/i.test(text)
+                if (looksHtml || (res.ok && !data)) {
+                  el.textContent =
+                    'Could not reach the sheet logger (often: Web app must allow anonymous access, or you need a new deployment version). Check the browser console (F12) for details.'
+                  if (typeof console !== 'undefined' && console.warn) {
+                    console.warn('[OGSC quiz] Sheet logger response (first 500 chars):', text.slice(0, 500))
+                  }
+                  return
+                }
+                el.textContent = 'Could not confirm logging (HTTP ' + res.status + '). Your result is still shown below.'
               })
             })
-            .catch(function () {
-              var el = document.getElementById('track-status')
+            .catch(function (err) {
+              var el = elAfter()
               if (el) {
                 el.hidden = false
-                el.textContent = 'Offline or blocked — completion may not have been logged.'
+                el.textContent =
+                  'Network or CORS blocked the sheet request. Host the quiz on https (not file://) and ensure the Apps Script URL ends in /exec.'
+              }
+              if (typeof console !== 'undefined' && console.warn) {
+                console.warn('[OGSC quiz] fetch error:', err)
               }
             })
         }

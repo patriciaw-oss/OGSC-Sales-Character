@@ -608,9 +608,9 @@
     <script>
       (function () {
         /**
-         * Completion tracking: set to your form/webhook URL (Formspree, Google Apps Script, etc.).
-         * POST body is JSON: { email, character, characterId, tagline, completedAt, source }.
-         * Leave '' to collect email in the quiz only (no network request).
+         * Google Sheets logging: deploy google-sheets-apps-script/Code.gs as a Web app
+         * (Deploy → Web app → Execute as: Me, Who has access: Anyone), then paste the
+         * /exec URL here. POST uses text/plain body (JSON) for compatibility with Apps Script.
          */
         var TRACKING_ENDPOINT = ''
 
@@ -1239,26 +1239,33 @@
 
           fetch(TRACKING_ENDPOINT, {
             method: 'POST',
+            redirect: 'follow',
             headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
+              'Content-Type': 'text/plain;charset=utf-8',
             },
             body: JSON.stringify(payload),
           })
             .then(function (res) {
-              var el = document.getElementById('track-status')
-              if (res.ok) {
+              return res.text().then(function (text) {
+                var data = null
                 try {
-                  sessionStorage.setItem('ogsc_quiz_logged', sig)
-                } catch (err) {}
-                if (el) {
+                  data = JSON.parse(text)
+                } catch (e) {}
+                var recorded = (data && data.ok === true) || res.ok
+                var el = document.getElementById('track-status')
+                if (recorded) {
+                  try {
+                    sessionStorage.setItem('ogsc_quiz_logged', sig)
+                  } catch (err) {}
+                  if (el) {
+                    el.hidden = false
+                    el.textContent = 'Thanks — your completion was saved to the team sheet.'
+                  }
+                } else if (el) {
                   el.hidden = false
-                  el.textContent = 'Thanks — your completion was recorded.'
+                  el.textContent = 'Could not confirm logging. Your result is still shown below.'
                 }
-              } else if (el) {
-                el.hidden = false
-                el.textContent = 'Could not confirm logging. Your result is still shown below.'
-              }
+              })
             })
             .catch(function () {
               var el = document.getElementById('track-status')

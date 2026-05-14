@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Cache-Control" content="no-store, max-age=0" />
-    <meta name="ogsc-quiz-build" content="form-post-v2" />
     <title>OGSC Character Discovery</title>
     <style>
       :root {
@@ -601,9 +600,7 @@
 
       <main id="main"></main>
 
-      <footer class="note">
-        Grab Green · OGSC Weekly Challenge #4 · Character Discovery · Quiz build <span id="quiz-build-id">form-post-v2</span>
-      </footer>
+      <footer class="note">OGSC Weekly Challenge #4 · Character Discovery</footer>
     </div>
 
     <!-- Google Apps Script loggers often block fetch(); a real form POST still runs doPost. -->
@@ -1333,16 +1330,6 @@
           if (btnAgain) btnAgain.addEventListener('click', reset)
 
           if (phase === 'results') trackCompletion()
-
-          var pageFoot = document.querySelector('footer.note')
-          if (pageFoot) {
-            if (phase === 'results') {
-              pageFoot.textContent = 'OGSC Weekly Challenge #4 · Character Discovery'
-            } else {
-              pageFoot.innerHTML =
-                'Grab Green · OGSC Weekly Challenge #4 · Character Discovery · Quiz build <span id="quiz-build-id">form-post-v2</span>'
-            }
-          }
         }
 
         answers = emptyAnswers()

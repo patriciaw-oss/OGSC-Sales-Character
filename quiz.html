@@ -206,13 +206,6 @@
         color: #fecaca;
       }
 
-      .track-status {
-        text-align: center;
-        font-size: 0.75rem;
-        color: rgba(167, 243, 208, 0.9);
-        margin: 0.5rem 0 0;
-      }
-
       .completed-as {
         text-align: center;
         font-size: 0.8125rem;
@@ -1233,7 +1226,6 @@
             '<button type="button" class="btn btn-primary" id="btn-again">Take challenge again</button>' +
             '</div>' +
             '<p class="share-hint" id="share-hint" hidden role="status"></p>' +
-            '<p class="track-status" id="track-status" hidden role="status"></p>' +
             '</section>'
           )
         }
@@ -1280,8 +1272,6 @@
             source: 'OGSC Character Discovery — Weekly Challenge #4',
           }
 
-          var el = document.getElementById('track-status')
-          if (!el) el = main.querySelector('#track-status')
           try {
             ensureSheetLoggerFrame()
             var form = document.createElement('form')
@@ -1298,16 +1288,7 @@
             form.submit()
             document.body.removeChild(form)
             lastSheetSubmitSig = sig
-            if (el) {
-              el.hidden = false
-              el.textContent =
-                'Submitted to the team sheet. Check the spreadsheet for a new row; if nothing appears, open Apps Script → Executions for errors.'
-            }
           } catch (err) {
-            if (el) {
-              el.hidden = false
-              el.textContent = 'Could not submit to the sheet. Try again or contact your admin.'
-            }
             if (typeof console !== 'undefined' && console.warn) {
               console.warn('[OGSC quiz] form submit error:', err)
             }
@@ -1352,6 +1333,16 @@
           if (btnAgain) btnAgain.addEventListener('click', reset)
 
           if (phase === 'results') trackCompletion()
+
+          var pageFoot = document.querySelector('footer.note')
+          if (pageFoot) {
+            if (phase === 'results') {
+              pageFoot.textContent = 'OGSC Weekly Challenge #4 · Character Discovery'
+            } else {
+              pageFoot.innerHTML =
+                'Grab Green · OGSC Weekly Challenge #4 · Character Discovery · Quiz build <span id="quiz-build-id">form-post-v2</span>'
+            }
+          }
         }
 
         answers = emptyAnswers()

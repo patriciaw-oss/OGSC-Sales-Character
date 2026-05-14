@@ -687,64 +687,29 @@
           {
             id: 1,
             prompt:
-              'A major project is announced on Monday. What does your Monday afternoon look like?',
+              "It's a Monday morning, a major project was tasked to you and 2 other team mates that is due on Friday.\nBy Monday evening, where are you at on the project?",
             options: [
               {
-                text: 'It’s already 50% done. I want my week clear for closing deals.',
+                text: "It's already 50% done. I'm always excited to get on new projects and start working on it!",
                 characterId: 'Day-1 Overachiever',
               },
               {
-                text: 'I’m ignoring the brief until I absolutely have to read it.',
+                text: "I've not opened the brief yet. ",
                 characterId: 'Procrastination Podium Champ',
               },
               {
-                text: "I’m deep-diving into the new campaign's internal Hype Kit and GrabX docs.",
+                text: "I'm into the rabbit hole of researching and preparing for the project. ",
                 characterId: 'Trend-Snatcher',
               },
             ],
           },
           {
             id: 2,
-            prompt: 'How do you feel about working right up against a deadline?',
+            prompt:
+              'When do you feel most "alive" when you are trying to get a project done?',
             options: [
               {
-                text: 'I hate it. I finish early to avoid the stress.',
-                characterId: 'Day-1 Overachiever',
-              },
-              {
-                text: 'That is when my brain finally wakes up and does its best work.',
-                characterId: 'Procrastination Podium Champ',
-              },
-              {
-                text: 'I’m usually done by then because I stay on a consistent schedule.',
-                characterId: STEADY,
-              },
-            ],
-          },
-          {
-            id: 3,
-            prompt: 'What is your relationship with your alarm clock?',
-            options: [
-              {
-                text: 'I’m up before it. The early bird gets the lead.',
-                characterId: 'Day-1 Overachiever',
-              },
-              {
-                text: 'I hit snooze until the panic of being late finally sets in.',
-                characterId: 'Procrastination Podium Champ',
-              },
-              {
-                text: 'I don’t need an alarm; my routine is a finely tuned machine.',
-                characterId: STEADY,
-              },
-            ],
-          },
-          {
-            id: 4,
-            prompt: 'When do you feel most "alive" during a task?',
-            options: [
-              {
-                text: 'The second I click "submit" way before anyone else.',
+                text: 'At the start of the project when I just got the brief!',
                 characterId: 'Day-1 Overachiever',
               },
               {
@@ -758,76 +723,58 @@
             ],
           },
           {
-            id: 5,
-            prompt: 'Would you finish a Sales Enablement module if there was no badge?',
+            id: 3,
+            prompt: 'What motivates you most to complete a project?',
             options: [
               {
-                text: 'Yes—I just want it off my plate and out of the way.',
+                text: 'Feeling productive and efficient! Love it when I get it done',
                 characterId: 'Day-1 Overachiever',
               },
               {
-                text: 'Only if there’s a reward (GrabVouchers or Points) at the end.',
+                text: "If there's a reward or recognition at the end",
                 characterId: 'Incentive Goblin',
               },
               {
-                text: 'Only if it gives me a competitive advantage in my next sales pitch.',
+                text: 'If the project is unique and new, and gives me a competitive advantage against my industry peers. ',
+                characterId: 'Trend-Snatcher',
+              },
+            ],
+          },
+          {
+            id: 4,
+            prompt: 'In a group project, you are the person who:',
+            options: [
+              {
+                text: 'The Leader - Provides the direction and keep everyone on track.',
+                characterId: 'Day-1 Overachiever',
+              },
+              {
+                text: "The follower - don't need too many voices and opinions. And I'll submit my part by the due date",
+                characterId: 'Procrastination Podium Champ',
+              },
+              {
+                text: 'The Innovator - I look into the trends, does all the research, make sure what we submit has an edge. ',
+                characterId: 'Trend-Snatcher',
+              },
+            ],
+          },
+          {
+            id: 5,
+            prompt: 'What’s your "Power Song" for a long day?',
+            options: [
+              {
+                text: 'High-tempo EDM to keep my sprint speed up.',
+                characterId: 'Day-1 Overachiever',
+              },
+              { text: 'Silence or Lo-fi for my steady quiet focus.', characterId: STEADY },
+              {
+                text: 'Whatever is currently #1 on Spotify.',
                 characterId: 'Trend-Snatcher',
               },
             ],
           },
           {
             id: 6,
-            prompt: 'You see a new "Battlecard" or "Pitch Deck" shared in the group chat. You:',
-            options: [
-              {
-                text: 'Already saved it and used it in a client call this morning.',
-                characterId: 'Trend-Snatcher',
-              },
-              {
-                text: 'Will look at it eventually... probably right before my next meeting.',
-                characterId: 'Procrastination Podium Champ',
-              },
-              {
-                text: 'Check if there is an incentive or commission benefit for using it.',
-                characterId: 'Incentive Goblin',
-              },
-            ],
-          },
-          {
-            id: 7,
-            prompt: 'What motivates you more: a top-tier reward or a peaceful weekend?',
-            options: [
-              {
-                text: 'The reward. I want the hardware and the prizes.',
-                characterId: 'Incentive Goblin',
-              },
-              {
-                text: 'A peaceful weekend—which is why I finish early.',
-                characterId: 'Day-1 Overachiever',
-              },
-              {
-                text: 'Being the expert who knows things before they are officially announced.',
-                characterId: 'Trend-Snatcher',
-              },
-            ],
-          },
-          {
-            id: 8,
-            prompt: 'Someone offers you a "Mystery Box" if you finish a task in 30 minutes. You:',
-            options: [
-              {
-                text: 'Drop everything. I love winning—whatever the prize is.',
-                characterId: 'Incentive Goblin',
-              },
-              { text: 'Ignore it. I have a methodical schedule to maintain.', characterId: STEADY },
-              {
-                text: 'Sprint to finish because I love the challenge of being first.',
-                characterId: 'Day-1 Overachiever',
-              },
-            ],
-          },
-          {
-            id: 9,
             prompt: 'Your digital workspace (desktop/tabs) looks like:',
             options: [
               {
@@ -845,25 +792,115 @@
             ],
           },
           {
-            id: 10,
+            id: 7,
             prompt: 'How do you handle a teammate who is falling behind on a deadline?',
             options: [
               {
-                text: 'I finish my work early so I can jump in and help.',
+                text: "I've finished my work early anyway, so I can jump in and help.",
                 characterId: 'Day-1 Overachiever',
               },
               {
-                text: 'I stay focused on my own steady pace and my own targets.',
+                text: 'I stay focused on my own steady pace and my own targets, I believe that they will get to it eventually.',
                 characterId: STEADY,
               },
               {
-                text: 'I send them the sales methodologies and frameworks provided by Enablement.',
+                text: 'I help them to prioritize their workload and put the tasks on a project tracker',
                 characterId: 'Trend-Snatcher',
               },
             ],
           },
           {
+            id: 8,
+            prompt: "It's Friday now, where are you at on the project? ",
+            options: [
+              {
+                text: "I've completed it and have my manager reviewed twice by now. ",
+                characterId: 'Day-1 Overachiever',
+              },
+              {
+                text: 'This is when I shine, my brain is awake to finally get started!',
+                characterId: 'Procrastination Podium Champ',
+              },
+              {
+                text: "I'm just about 90% done and finalizing it by mid day",
+                characterId: STEADY,
+              },
+            ],
+          },
+          {
+            id: 9,
+            prompt:
+              "It's the weekend, yay! You have submitted your project yesterday. How does the weekend look like for you?",
+            options: [
+              {
+                text: "I have the whole weekend planned out to the T! \nDon't want to waste a single minute wondering what to do",
+                characterId: 'Day-1 Overachiever',
+              },
+              {
+                text: "I snooze till booze! I'll let the weekend take me through whatever it wants to do",
+                characterId: 'Procrastination Podium Champ',
+              },
+              {
+                text: 'Every weekend is the same - workout, house chores, grocery run, netflix & chill. ',
+                characterId: STEADY,
+              },
+            ],
+          },
+          {
+            id: 10,
+            prompt:
+              'How do you react if you miss a deadline and lose your "Active" status/streak?',
+            options: [
+              {
+                text: "It wouldn't happen; I'm never late.",
+                characterId: 'Day-1 Overachiever',
+              },
+              {
+                text: "I'm used to it—I'll just catch up on the next one.",
+                characterId: 'Procrastination Podium Champ',
+              },
+              {
+                text: "I'll avoid it at all costs—I don't want to lose out on my rewards.",
+                characterId: 'Incentive Goblin',
+              },
+            ],
+          },
+          {
             id: 11,
+            prompt: 'Someone offers you a "Mystery Box" if you finish a task in 30 minutes. You:',
+            options: [
+              {
+                text: 'Drop everything. I love winning—whatever the prize is.',
+                characterId: 'Incentive Goblin',
+              },
+              { text: 'Ignore it. I have a methodical schedule to maintain.', characterId: STEADY },
+              {
+                text: 'Sprint to finish because I love the challenge of being first.',
+                characterId: 'Day-1 Overachiever',
+              },
+            ],
+          },
+          {
+            id: 12,
+            prompt:
+              'You see a new "Battlecard" or "Pitch Deck" shared in Slack channel. You:',
+            options: [
+              {
+                text: 'Bookmark it immediately and customizes to use it in the next client call',
+                characterId: 'Trend-Snatcher',
+              },
+              {
+                text: 'Will look at it eventually... probably right before my next meeting.',
+                characterId: 'Procrastination Podium Champ',
+              },
+              {
+                text: 'Check if there is an incentive or commission benefit for using it.',
+                characterId: 'Incentive Goblin',
+              },
+            ],
+          },
+          {
+            id: 13,
             prompt: '"Done is better than perfect." Do you agree?',
             options: [
               {
@@ -881,50 +918,20 @@
             ],
           },
           {
-            id: 12,
-            prompt: 'What’s your "Power Song" for a long day?',
-            options: [
-              {
-                text: 'High-tempo EDM to keep my sprint speed up.',
-                characterId: 'Day-1 Overachiever',
-              },
-              { text: 'Silence or Lo-fi for my steady quiet focus.', characterId: STEADY },
-              { text: 'Whatever is currently #1 on Spotify.', characterId: 'Trend-Snatcher' },
-            ],
-          },
-          {
-            id: 13,
-            prompt: 'In a group project you are the person who:',
-            options: [
-              {
-                text: 'Submits their part immediately to get it over with.',
-                characterId: 'Day-1 Overachiever',
-              },
-              {
-                text: 'Submits their part at the very last second possible.',
-                characterId: 'Procrastination Podium Champ',
-              },
-              {
-                text: 'Ensures we are aligning with the Grab 4H pillars (Heart Hunger Honour Humility).',
-                characterId: 'Trend-Snatcher',
-              },
-            ],
-          },
-          {
             id: 14,
-            prompt: 'How do you react if you miss a deadline and lose your "Active" status/streak?',
+            prompt: 'What motivates you more: a top-tier reward or a peaceful weekend?',
             options: [
               {
-                text: "It wouldn't happen; I'm never late.",
+                text: 'The reward. I want the hardware and the prizes.',
+                characterId: 'Incentive Goblin',
+              },
+              {
+                text: 'A peaceful weekend—which is why I finish early.',
                 characterId: 'Day-1 Overachiever',
               },
               {
-                text: "I'm used to it—I'll just catch up on the next one.",
-                characterId: 'Procrastination Podium Champ',
-              },
-              {
-                text: "I'll avoid it at all costs—I don't want to lose out on my rewards.",
-                characterId: 'Incentive Goblin',
+                text: 'Being the expert who knows things before they are officially announced.',
+                characterId: 'Trend-Snatcher',
               },
             ],
           },
